@@ -1,6 +1,7 @@
-﻿using ErrorOr;
+﻿using DomeGym.Domain.RoomAggregate;
+using ErrorOr;
 
-namespace DomeGym.Domain;
+namespace DomeGym.Domain.GymAggregate;
 
 public static class GymErrors
 {
@@ -13,22 +14,20 @@ public static class GymErrors
         "A gym cannot have more rooms than the subscription allows");
 }
 
-public class Gym
+public sealed class Gym : AggregateRoot
 {
     private readonly Guid _subscriptionId;
     private readonly int _maxRooms;
-    private readonly List<Guid> _roomIds = new();
-
-    public Guid Id { get; }
+    private readonly List<Guid> _roomIds = [];
 
     public Gym(
         int maxRooms,
         Guid subscriptionId,
         Guid? id = null)
+        : base(id ?? Guid.NewGuid())
     {
         _maxRooms = maxRooms;
         _subscriptionId = subscriptionId;
-        Id = id ?? Guid.NewGuid();
     }
 
     public ErrorOr<Success> AddRoom(Room room)

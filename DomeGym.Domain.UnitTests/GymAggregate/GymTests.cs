@@ -1,9 +1,10 @@
-﻿using DomeGym.Domain.UnitTests.TestUtils.Gyms;
+﻿using DomeGym.Domain.GymAggregate;
+using DomeGym.Domain.UnitTests.TestUtils.Gyms;
 using DomeGym.Domain.UnitTests.TestUtils.Rooms;
 using FluentAssertions;
 using Xunit;
 
-namespace DomeGym.Domain.UnitTests;
+namespace DomeGym.Domain.UnitTests.GymAggregate;
 
 public sealed class GymTests
 {

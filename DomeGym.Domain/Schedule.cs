@@ -1,4 +1,5 @@
 ﻿using ErrorOr;
+using System.Security.Cryptography;
 
 namespace DomeGym.Domain;
 
@@ -13,17 +14,16 @@ public static class ScheduleErrors
         "Booking not found");
 }
 
-public class Schedule
+public sealed class Schedule : Entity
 {
-    private readonly Dictionary<DateOnly, List<TimeRange>> _calendar = new();
-    private readonly Guid _id;
+    private readonly Dictionary<DateOnly, List<TimeRange>> _calendar;
 
     public Schedule(
-        Dictionary<DateOnly, List<TimeRange>> calendar = null,
+        Dictionary<DateOnly, List<TimeRange>>? calendar = null,
         Guid? id = null)
+        : base(id ?? Guid.NewGuid())
     {
-        _calendar = calendar ?? new();
-        _id = id ?? Guid.NewGuid();
+        _calendar = calendar ?? [];
     }
 
     public static Schedule Empty()
@@ -45,11 +45,11 @@ public class Schedule
     {
         if (!_calendar.TryGetValue(date, out var timeSlots))
         {
-            _calendar[date] = new() { time };
+            _calendar[date] = [time];
             return Result.Success;
         }
 
-        if (timeSlots.Any(timeSlot => timeSlot.OverlapsWith(time))) ;
+        if (timeSlots.Any(timeSlot => timeSlot.OverlapsWith(time)))
         {
             return ScheduleErrors.Conflict;
         }
@@ -73,6 +73,4 @@ public class Schedule
 
         return Result.Success;
     }
-
-    private Schedule() {}
 }

@@ -1,33 +1,36 @@
-﻿using ErrorOr;
+﻿using DomeGym.Domain.ParticipantAggregate;
+using ErrorOr;
 
-namespace DomeGym.Domain;
+namespace DomeGym.Domain.SessionAggregate;
 
 public static class SessionErrors
 {
-    public readonly static Error CannotHaveMoreReservationsThanParticipants = Error.Validation(
+    public static readonly Error CannotHaveMoreReservationsThanParticipants = Error.Validation(
         "Session.CannotHaveMoreReservationsThanParticipants",
         "Cannot have more reservations than participants");
 
-    public readonly static Error CannotCancelReservationTooCloseToSession = Error.Validation(
+    public static readonly Error CannotCancelReservationTooCloseToSession = Error.Validation(
         "Session.CannotCancelReservationTooCloseToSession",
         "Cannot cancel reservation too close to session");
 
-    public readonly static Error ParticipantNotFound = Error.NotFound(
+    public static readonly Error ParticipantNotFound = Error.NotFound(
         "Session.ParticipantNotFound",
         "Participant not found");
 
-    public readonly static Error ParticipantsCannotReserveSameSessionTwice = Error.Conflict(
+    public static readonly Error ParticipantsCannotReserveSameSessionTwice = Error.Conflict(
         "Session.ParticipantsCannotReserveSameSessionTwice",
         "Participants cannot reserve twice to the same session");
+
+    public static readonly Error ReservationNotFound = Error.NotFound(
+        "Session.ReservationNotFound",
+        "Reservation not found");
 }
 
-public class Session
+public sealed class Session : AggregateRoot
 {
     private readonly Guid _trainerId;
-    private readonly List<Guid> _participantIds = new();
+    private readonly List<Reservation> _reservations = [];
     private readonly int _maxParticipants;
-
-    public Guid Id { get; }
 
     public DateOnly Date { get; }
 
@@ -39,12 +42,12 @@ public class Session
         int maxParticipants,
         Guid trainerId,
         Guid? id = null)
+        : base(id ?? Guid.NewGuid())
     {
         Date = date;
         Time = time;
         _maxParticipants = maxParticipants;
         _trainerId = trainerId;
-        Id = id ?? Guid.NewGuid();
     }
 
     public ErrorOr<Success> CancelReservation(Participant participant, IDateTimeProvider dateTimeProvider)
@@ -54,10 +57,13 @@ public class Session
             return SessionErrors.CannotCancelReservationTooCloseToSession;
         }
 
-        if (!_participantIds.Remove(participant.Id))
+        var reservation = _reservations.Find(reservation => reservation.ParticipantId == participant.Id);
+        if (reservation is null)
         {
-            return SessionErrors.ParticipantNotFound;
+            return SessionErrors.ReservationNotFound;
         }
+
+        _reservations.Remove(reservation);
 
         return Result.Success;
     }
@@ -71,17 +77,19 @@ public class Session
 
     public ErrorOr<Success> ReserveSpot(Participant participant)
     {
-        if (_participantIds.Count >= _maxParticipants)
+        if (_reservations.Count >= _maxParticipants)
         {
             return SessionErrors.CannotHaveMoreReservationsThanParticipants;
         }
 
-        if (_participantIds.Contains(participant.Id))
+        if (_reservations.Any(reservation => reservation.ParticipantId == participant.Id))
         {
             return SessionErrors.ParticipantsCannotReserveSameSessionTwice;
         }
 
-        _participantIds.Add(participant.Id);
+        var reservation = new Reservation(participant.Id);
+
+        _reservations.Add(reservation);
 
         return Result.Success;
     }

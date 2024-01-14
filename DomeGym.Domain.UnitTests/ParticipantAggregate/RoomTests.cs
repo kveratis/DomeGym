@@ -1,11 +1,12 @@
-﻿using DomeGym.Domain.UnitTests.TestConstants;
+﻿using DomeGym.Domain.RoomAggregate;
+using DomeGym.Domain.UnitTests.TestConstants;
 using DomeGym.Domain.UnitTests.TestUtils.Common;
 using DomeGym.Domain.UnitTests.TestUtils.Rooms;
 using DomeGym.Domain.UnitTests.TestUtils.Sessions;
 using FluentAssertions;
 using Xunit;
 
-namespace DomeGym.Domain.UnitTests;
+namespace DomeGym.Domain.UnitTests.ParticipantAggregate;
 
 public sealed class RoomTests
 {

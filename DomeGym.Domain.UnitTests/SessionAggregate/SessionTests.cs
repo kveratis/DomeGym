@@ -1,11 +1,12 @@
-﻿using DomeGym.Domain.UnitTests.TestConstants;
+﻿using DomeGym.Domain.SessionAggregate;
+using DomeGym.Domain.UnitTests.TestConstants;
 using DomeGym.Domain.UnitTests.TestUtils.Participants;
 using DomeGym.Domain.UnitTests.TestUtils.Services;
 using DomeGym.Domain.UnitTests.TestUtils.Sessions;
 using FluentAssertions;
 using Xunit;
 
-namespace DomeGym.Domain.UnitTests;
+namespace DomeGym.Domain.UnitTests.SessionAggregate;
 
 public sealed class SessionTests
 {
@@ -43,7 +44,7 @@ public sealed class SessionTests
         // Act
         var reserveSpotResult = session.ReserveSpot(participant);
         var cancelReservationResult = session.CancelReservation(
-            participant, 
+            participant,
             new TestDateTimeProvider(fixedDateTime: cancellationDateTime));
 
         // Assert

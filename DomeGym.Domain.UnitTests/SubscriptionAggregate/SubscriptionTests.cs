@@ -1,9 +1,10 @@
-﻿using DomeGym.Domain.UnitTests.TestUtils.Gyms;
+﻿using DomeGym.Domain.SubscriptionAggregate;
+using DomeGym.Domain.UnitTests.TestUtils.Gyms;
 using DomeGym.Domain.UnitTests.TestUtils.Subscriptions;
 using FluentAssertions;
 using Xunit;
 
-namespace DomeGym.Domain.UnitTests;
+namespace DomeGym.Domain.UnitTests.SubscriptionAggregate;
 
 public sealed class SubscriptionTests
 {

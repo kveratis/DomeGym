@@ -1,13 +1,14 @@
-﻿using DomeGym.Domain.UnitTests.TestConstants;
+﻿using DomeGym.Domain.ParticipantAggregate;
+using DomeGym.Domain.UnitTests.TestConstants;
 using DomeGym.Domain.UnitTests.TestUtils.Common;
+using DomeGym.Domain.UnitTests.TestUtils.Participants;
 using DomeGym.Domain.UnitTests.TestUtils.Sessions;
-using DomeGym.Domain.UnitTests.TestUtils.Trainers;
 using FluentAssertions;
 using Xunit;
 
-namespace DomeGym.Domain.UnitTests;
+namespace DomeGym.Domain.UnitTests.ParticipantAggregate;
 
-public sealed class TrainerTests
+public sealed class ParticipantTests
 {
     [Theory]
     [InlineData(1, 3, 1, 3)]
@@ -21,7 +22,7 @@ public sealed class TrainerTests
         int endHourSession2)
     {
         // Arrange
-        var trainer = TrainerFactory.CreateTrainer();
+        var participant = ParticipantFactory.CreateParticipant();
 
         var session1 = SessionFactory.CreateSession(
             date: Constants.Session.Date,
@@ -34,13 +35,14 @@ public sealed class TrainerTests
             id: Guid.NewGuid());
 
         // Act
-        var addSession1Result = trainer.AddSessionToSchedule(session1);
-        var addSession2Result = trainer.AddSessionToSchedule(session2);
+        var addSession1Result = participant.AddToSchedule(session1);
+        var addSession2Result = participant.AddToSchedule(session2);
 
         // Assert
         addSession1Result.IsError.Should().BeFalse();
 
         addSession2Result.IsError.Should().BeTrue();
-        addSession2Result.FirstError.Should().Be(TrainerErrors.CannotHaveTwoOrMoreOverlappingSessions);
+        addSession2Result.FirstError.Should().Be(ParticipantErrors.CannotHaveTwoOrMoreOverlappingSessions);
+
     }
 }

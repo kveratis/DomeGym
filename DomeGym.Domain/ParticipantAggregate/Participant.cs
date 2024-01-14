@@ -1,6 +1,7 @@
-﻿using ErrorOr;
+﻿using DomeGym.Domain.SessionAggregate;
+using ErrorOr;
 
-namespace DomeGym.Domain;
+namespace DomeGym.Domain.ParticipantAggregate;
 
 public static class ParticipantErrors
 {
@@ -13,7 +14,7 @@ public static class ParticipantErrors
         "A participant cannot have two or more overlapping sessions");
 }
 
-public class Participant
+public sealed class Participant : AggregateRoot
 {
     private readonly Schedule _schedule = Schedule.Empty();
 
@@ -22,16 +23,14 @@ public class Participant
     /// </summary>
     private readonly Guid _userId;
 
-    private readonly List<Guid> _sessionIds = new();
-
-    public Guid Id { get; }
+    private readonly List<Guid> _sessionIds = [];
 
     public Participant(
         Guid userId,
         Guid? id = null)
+        : base(id ?? Guid.NewGuid())
     {
         _userId = userId;
-        Id = id ?? Guid.NewGuid();
     }
 
     public ErrorOr<Success> AddToSchedule(Session session)

@@ -1,18 +1,8 @@
 ﻿using Ardalis.SmartEnum;
+using DomeGym.Domain.GymAggregate;
 using ErrorOr;
 
-namespace DomeGym.Domain;
-
-public static class SubscriptionErrors
-{
-    public static readonly Error GymAlreadyExists = Error.Conflict(
-        "Subscription.GymAlreadyExists",
-        "Gym already exists");
-
-    public static readonly Error CannotHaveMoreGymsThanSubscriptionAllows = Error.Validation(
-        "Subscription.CannotHaveMoreGymsThanSubscriptionAllows",
-        "A subscription cannot have more gyms than the subscription allows");
-}
+namespace DomeGym.Domain.SubscriptionAggregate;
 
 public sealed class SubscriptionType : SmartEnum<SubscriptionType>
 {
@@ -25,10 +15,20 @@ public sealed class SubscriptionType : SmartEnum<SubscriptionType>
     }
 }
 
-public class Subscription
+public static class SubscriptionErrors
 {
-    private readonly Guid _id;
-    private readonly List<Guid> _gymIds = new();
+    public static readonly Error GymAlreadyExists = Error.Conflict(
+        "Subscription.GymAlreadyExists",
+        "Gym already exists");
+
+    public static readonly Error CannotHaveMoreGymsThanSubscriptionAllows = Error.Validation(
+        "Subscription.CannotHaveMoreGymsThanSubscriptionAllows",
+        "A subscription cannot have more gyms than the subscription allows");
+}
+
+public sealed class Subscription : AggregateRoot
+{
+    private readonly List<Guid> _gymIds = [];
     private readonly SubscriptionType _subscriptionType;
     private readonly int _maxGyms;
     private readonly Guid _adminId;
@@ -37,11 +37,11 @@ public class Subscription
         SubscriptionType subscriptionType,
         Guid adminId,
         Guid? id = null)
+        : base(id ?? Guid.NewGuid())
     {
         _subscriptionType = subscriptionType;
         _maxGyms = GetMaxGyms();
         _adminId = adminId;
-        _id = id ?? Guid.NewGuid();
     }
 
     public int GetMaxGyms() => _subscriptionType.Name switch

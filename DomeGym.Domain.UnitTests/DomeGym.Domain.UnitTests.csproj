@@ -24,4 +24,8 @@
     <ProjectReference Include="..\DomeGym.Domain\DomeGym.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="RoomAggregate\" />
+  </ItemGroup>
+
 </Project>

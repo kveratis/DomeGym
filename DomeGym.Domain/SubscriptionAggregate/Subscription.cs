@@ -70,7 +70,7 @@ public sealed class Subscription : AggregateRoot
 
     public ErrorOr<Success> AddGym(Gym gym)
     {
-        if (_gymIds.Contains(gym.Id))
+        if (HasGym(gym.Id))
         {
             return SubscriptionErrors.GymAlreadyExists;
         }
@@ -83,5 +83,10 @@ public sealed class Subscription : AggregateRoot
         _gymIds.Add(gym.Id);
 
         return Result.Success;
+    }
+
+    public bool HasGym(Guid gymId)
+    {
+        return _gymIds.Contains(gymId);
     }
 }

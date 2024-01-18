@@ -12,25 +12,29 @@ public static class TrainerErrors
     public static readonly Error CannotHaveTwoOrMoreOverlappingSessions = Error.Validation(
         "Trainer.CannotHaveTwoOrMoreOverlappingSessions",
         "A trainer cannot have two or more overlapping sessions");
+    
+    public static readonly Error SessionNotFound = Error.NotFound(
+        "Trainer.SessionNotFound",
+        "Session not found");
 }
 
 public sealed class Trainer : AggregateRoot
 {
-    /// <summary>
-    /// The user id that created this Trainer profile
-    /// </summary>
-    private readonly Guid _userId;
-
     private readonly List<Guid> _sessionIds = [];
     private readonly Schedule _schedule;
 
+    /// <summary>
+    /// The user id that created this Trainer profile
+    /// </summary>
+    public Guid UserId { get; }
+    
     public Trainer(
         Guid userId,
         Schedule? schedule = null,
         Guid? id = null)
         : base(id ?? Guid.NewGuid())
     {
-        _userId = userId;
+        UserId = userId;
         _schedule = schedule ?? Schedule.Empty();
     }
 
@@ -50,6 +54,31 @@ public sealed class Trainer : AggregateRoot
 
         _sessionIds.Add(session.Id);
 
+        return Result.Success;
+    }
+    
+    public bool IsTimeSlotFree(DateOnly date, TimeRange time)
+    {
+        return _schedule.CanBookTimeSlot(date, time);
+    }
+    
+    public ErrorOr<Success> RemoveFromSchedule(Session session)
+    {
+        if (!_sessionIds.Contains(session.Id))
+        {
+            return TrainerErrors.SessionNotFound;
+        }
+
+        var removeBookingResult = _schedule.RemoveBooking(
+            session.Date,
+            session.Time);
+
+        if (removeBookingResult.IsError)
+        {
+            return removeBookingResult.Errors;
+        }
+
+        _sessionIds.Remove(session.Id);
         return Result.Success;
     }
 }

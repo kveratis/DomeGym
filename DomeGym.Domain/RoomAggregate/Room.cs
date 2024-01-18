@@ -20,31 +20,48 @@ public static class RoomErrors
 
 public sealed class Room : AggregateRoot
 {
-    private readonly List<Guid> _sessionIds = [];
+    private readonly Dictionary<DateOnly, List<Guid>> _sessionIdsByDate = [];
     private readonly int _maxDailySessions;
-    private readonly Guid _gymId;
     private readonly Schedule _schedule;
 
+    public string Name { get; } = null!;
+
+    public Guid GymId { get; }
+    
+    public IReadOnlyList<Guid> SessionIds => _sessionIdsByDate.Values
+        .SelectMany(sessionIds => sessionIds)
+        .ToList()
+        .AsReadOnly();
+    
     public Room(
+        string name,
         int maxDailySessions,
         Guid gymId,
         Schedule? schedule = null,
         Guid? id = null)
         : base(id ?? Guid.NewGuid())
     {
+        Name = name;
         _maxDailySessions = maxDailySessions;
-        _gymId = gymId;
+        GymId = gymId;
         _schedule = schedule ?? Schedule.Empty();
     }
 
     public ErrorOr<Success> ScheduleSession(Session session)
     {
-        if (_sessionIds.Any(id => id == session.Id))
+        if (SessionIds.Any(id => id == session.Id))
         {
             return RoomErrors.SessionAlreadyExists;
         }
+        
+        if (!_sessionIdsByDate.ContainsKey(session.Date))
+        {
+            _sessionIdsByDate[session.Date] = new();
+        }
 
-        if (_sessionIds.Count >= _maxDailySessions)
+        var dailySessions = _sessionIdsByDate[session.Date];
+        
+        if (dailySessions.Count >= _maxDailySessions)
         {
             return RoomErrors.CannotHaveMoreSessionsThanSubscriptionAllows;
         }
@@ -56,8 +73,13 @@ public sealed class Room : AggregateRoot
             return RoomErrors.CannotHaveTwoOrMoreOverlappingSessions;
         }
 
-        _sessionIds.Add(session.Id);
+        dailySessions.Add(session.Id);
 
         return Result.Success;
+    }
+    
+    public bool HasSession(Guid sessionId)
+    {
+        return SessionIds.Contains(sessionId);
     }
 }

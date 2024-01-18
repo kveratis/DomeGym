@@ -17,6 +17,10 @@ public static class GymErrors
     public static readonly Error TrainerAlreadyAssignedToGym = Error.Conflict(
         "Gym.TrainerAlreadyAssignedToGym",
         "Trainer already assigned to gym");
+    
+    public static readonly Error RoomNotFound = Error.NotFound(
+        "Gym.RoomNotFound",
+        "Room not found");
 }
 
 public sealed class Gym : AggregateRoot
@@ -77,5 +81,17 @@ public sealed class Gym : AggregateRoot
     public bool HasTrainer(Guid trainerId)
     {
         return _trainerIds.Contains(trainerId);
+    }
+    
+    public ErrorOr<Success> RemoveRoom(Room room)
+    {
+        if (!HasRoom(room.Id))
+        {
+            return GymErrors.RoomNotFound;
+        }
+
+        _roomIds.Remove(room.Id);
+
+        return Result.Success;
     }
 }

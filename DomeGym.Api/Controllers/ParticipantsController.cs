@@ -12,6 +12,7 @@ public record ListParticipantSessionsQuery(
     DateTime? StartDateTime = null,
     DateTime? EndDateTime = null) : IRequest<ErrorOr<List<Session>>>;
 
+[Route("participants")]
 public sealed class ParticipantsController : ApiController
 {
     private readonly ISender _sender;

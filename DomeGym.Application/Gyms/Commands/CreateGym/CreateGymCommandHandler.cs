@@ -7,10 +7,6 @@ namespace DomeGym.Application.Gyms.Commands.CreateGym;
 
 public sealed class CreateGymCommandHandler : IRequestHandler<CreateGymCommand, ErrorOr<Gym>>
 {
-    public static readonly Error SubscriptionNotFound = Error.NotFound(
-        "CreateGymCommandHandler.SubscriptionNotFound",
-        "Subscription not found");
-
     private readonly ISubscriptionsRepository _subscriptionsRepository;
 
     public CreateGymCommandHandler(ISubscriptionsRepository subscriptionsRepository)
@@ -24,7 +20,7 @@ public sealed class CreateGymCommandHandler : IRequestHandler<CreateGymCommand, 
 
         if (subscription is null)
         {
-            return SubscriptionNotFound;
+            return CreateGymErrors.SubscriptionNotFound;
         }
 
         var gym = new Gym(

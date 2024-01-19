@@ -8,14 +8,6 @@ namespace DomeGym.Application.Gyms.Queries.ListSessions;
 
 public sealed class ListSessionsQueryHandler : IRequestHandler<ListSessionsQuery, ErrorOr<List<Session>>>
 {
-    public static readonly Error SubscriptionNotFound = Error.NotFound(
-        "ListSessionsQueryHandler.SubscriptionNotFound",
-        "Subscription not found");
-
-    public static readonly Error GymNotFound = Error.NotFound(
-        "ListSessionsQueryHandler.GymNotFound",
-        "Gym not found");
-
     private readonly ISubscriptionsRepository _subscriptionsRepository;
     private readonly IGymsRepository _gymsRepository;
     private readonly ISessionsRepository _sessionsRepository;
@@ -33,17 +25,17 @@ public sealed class ListSessionsQueryHandler : IRequestHandler<ListSessionsQuery
 
         if (subscription is null)
         {
-            return SubscriptionNotFound;
+            return ListSessionsErrors.SubscriptionNotFound;
         }
 
         if (!subscription.HasGym(query.GymId))
         {
-            return GymNotFound;
+            return ListSessionsErrors.GymNotFound;
         }
 
         if (!await _gymsRepository.ExistsAsync(query.GymId))
         {
-            return GymNotFound;
+            return ListSessionsErrors.GymNotFound;
         }
 
         return await _sessionsRepository.ListByGymIdAsync(query.GymId, query.StartDateTime, query.EndDateTime, query.Categories);

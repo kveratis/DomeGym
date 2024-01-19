@@ -8,22 +8,6 @@ namespace DomeGym.Application.Participants.Commands.CancelReservation;
 
 public sealed class CancelReservationCommandHandler : IRequestHandler<CancelReservationCommand, ErrorOr<Deleted>>
 {
-    public static readonly Error SessionNotFound = Error.NotFound(
-        "CancelReservationCommandHandler.SessionNotFound",
-        "Session not found");
-    
-    public static readonly Error UserDoesntHaveReservation = Error.NotFound(
-        "CancelReservationCommandHandler.UserDoesntHaveReservation", 
-        "User doesn't have a reservation for the given session");
-    
-    public static readonly Error ParticipantNotFound = Error.NotFound(
-        "CancelReservationCommandHandler.ParticipantNotFound",
-        "Participant not found");
-    
-    public static readonly Error ParticipantExpectedToHaveReservation = Error.Unexpected(
-        "CancelReservationCommandHandler.ParticipantExpectedToHaveReservation", 
-        "Participant expected to have reservation to session");
-    
     private readonly ISessionsRepository _sessionsRepository;
     private readonly IParticipantsRepository _participantsRepository;
     private readonly IDateTimeProvider _dateTimeProvider;
@@ -41,24 +25,24 @@ public sealed class CancelReservationCommandHandler : IRequestHandler<CancelRese
 
         if (session is null)
         {
-            return SessionNotFound;
+            return CancelReservationErrors.SessionNotFound;
         }
 
         if (!session.HasReservationForParticipant(command.ParticipantId))
         {
-            return UserDoesntHaveReservation;
+            return CancelReservationErrors.UserDoesntHaveReservation;
         }
 
         var participant = await _participantsRepository.GetByIdAsync(command.ParticipantId);
 
         if (participant is null)
         {
-            return ParticipantNotFound;
+            return CancelReservationErrors.ParticipantNotFound;
         }
 
         if (!participant.HasReservationForSession(session.Id))
         {
-            return ParticipantExpectedToHaveReservation;
+            return CancelReservationErrors.ParticipantExpectedToHaveReservation;
         }
 
         var cancelReservationResult = session.CancelReservation(participant, _dateTimeProvider);

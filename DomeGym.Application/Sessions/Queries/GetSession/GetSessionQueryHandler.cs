@@ -7,14 +7,6 @@ namespace DomeGym.Application.Sessions.Queries.GetSession;
 
 public sealed class GetSessionQueryHandler : IRequestHandler<GetSessionQuery, ErrorOr<Session>>
 {
-    public static readonly Error RoomNotFound = Error.NotFound(
-        "GetSessionQueryHandler.RoomNotFound", 
-        "Room not found");
-    
-    public static readonly Error SessionNotFound = Error.NotFound(
-        "GetSessionQueryHandler.SessionNotFound", 
-        "Session not found");
-    
     private readonly IRoomsRepository _roomsRepository;
     private readonly ISessionsRepository _sessionsRepository;
 
@@ -30,17 +22,17 @@ public sealed class GetSessionQueryHandler : IRequestHandler<GetSessionQuery, Er
 
         if (room is null)
         {
-            return RoomNotFound;
+            return GetSessionErrors.RoomNotFound;
         }
 
         if (!room.HasSession(query.SessionId))
         {
-            return SessionNotFound;
+            return GetSessionErrors.SessionNotFound;
         }
 
         if (await _sessionsRepository.GetByIdAsync(query.SessionId) is not Session session)
         {
-            return SessionNotFound;
+            return GetSessionErrors.SessionNotFound;
         }
 
         return session;

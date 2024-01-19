@@ -8,14 +8,6 @@ namespace DomeGym.Application.Rooms.Commands.CreateRoom;
 
 public sealed class CreateRoomCommandHandler : IRequestHandler<CreateRoomCommand, ErrorOr<Room>>
 {
-    public static readonly Error GymNotFound = Error.NotFound(
-        "CreateRoomCommandHandler.GymNotFound", 
-        "Gym not found");
-    
-    public static readonly Error SubscriptionNotFound = Error.NotFound(
-        "CreateRoomCommandHandler.SubscriptionNotFound", 
-        "Subscription not found");
-    
     private readonly ISubscriptionsRepository _subscriptionsRepository;
     private readonly IGymsRepository _gymsRepository;
 
@@ -31,14 +23,14 @@ public sealed class CreateRoomCommandHandler : IRequestHandler<CreateRoomCommand
 
         if (gym is null)
         {
-            return GymNotFound;
+            return CreateRoomErrors.GymNotFound;
         }
 
         var subscription = await _subscriptionsRepository.GetByIdAsync(gym.SubscriptionId);
 
         if (subscription is null)
         {
-            return SubscriptionNotFound;
+            return CreateRoomErrors.SubscriptionNotFound;
         }
 
         var room = new Room(

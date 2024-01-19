@@ -8,22 +8,6 @@ namespace DomeGym.Application.Gyms.Commands.AddTrainer;
 
 public sealed class AddTrainerCommandHandler : IRequestHandler<AddTrainerCommand, ErrorOr<Success>>
 {
-    public static readonly Error SubscriptionNotFound = Error.NotFound(
-        "AddTrainerCommandHandler.SubscriptionNotFound",
-        "Subscription not found");
-
-    public static readonly Error GymNotFound = Error.NotFound(
-        "AddTrainerCommandHandler.GymNotFound",
-        "Gym not found");
-
-    public static readonly Error TrainerAlreadyInGym = Error.Conflict(
-        "AddTrainerCommandHandler.TrainerAlreadyInGym",
-        "Trainer already in gym");
-
-    public static readonly Error TrainerNotFound = Error.NotFound(
-        "AddTrainerCommandHandler.TrainerNotFound",
-        "Trainer not found");
-
     private readonly IGymsRepository _gymsRepository;
     private readonly ISubscriptionsRepository _subscriptionsRepository;
     private readonly ITrainersRepository _trainerRepository;
@@ -42,31 +26,31 @@ public sealed class AddTrainerCommandHandler : IRequestHandler<AddTrainerCommand
 
         if (subscription is null)
         {
-            return SubscriptionNotFound;
+            return AddTrainerErrors.SubscriptionNotFound;
         }
 
         if (!subscription.HasGym(command.GymId))
         {
-            return GymNotFound;
+            return AddTrainerErrors.GymNotFound;
         }
 
         var gym = await _gymsRepository.GetByIdAsync(command.GymId);
 
         if (gym is null)
         {
-            return GymNotFound;
+            return AddTrainerErrors.GymNotFound;
         }
 
         if (gym.HasTrainer(command.TrainerId))
         {
-            return TrainerAlreadyInGym;
+            return AddTrainerErrors.TrainerAlreadyInGym;
         }
 
         var trainer = await _trainerRepository.GetByIdAsync(command.TrainerId);
 
         if (trainer is null)
         {
-            return TrainerNotFound;
+            return AddTrainerErrors.TrainerNotFound;
         }
 
         gym.AddTrainer(trainer);

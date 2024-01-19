@@ -7,10 +7,6 @@ namespace DomeGym.Application.Rooms.Queries.ListRooms;
 
 public sealed class ListRoomsQueryHandler : IRequestHandler<ListRoomsQuery, ErrorOr<List<Room>>>
 {
-    public static readonly Error GymNotFound = Error.NotFound(
-        "ListRoomsQueryHandler.GymNotFound", 
-        "Gym not found");
-    
     private readonly IGymsRepository _gymsRepository;
     private readonly IRoomsRepository _roomsRepository;
 
@@ -24,7 +20,7 @@ public sealed class ListRoomsQueryHandler : IRequestHandler<ListRoomsQuery, Erro
     {
         if (!await _gymsRepository.ExistsAsync(query.GymId))
         {
-            return GymNotFound;
+            return ListRoomsErrors.GymNotFound;
         }
 
         return await _roomsRepository.ListByGymIdAsync(query.GymId);

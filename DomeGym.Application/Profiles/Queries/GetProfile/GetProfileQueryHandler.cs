@@ -27,7 +27,7 @@ public sealed class GetProfileQueryHandler: IRequestHandler<GetProfileQuery, Err
             nameof(ProfileType.Admin) => await _adminsRepository.GetProfileByUserIdAsync(query.UserId),
             nameof(ProfileType.Participant) => await _participantsRepository.GetProfileByUserIdAsync(query.UserId),
             nameof(ProfileType.Trainer) => await _trainersRepository.GetProfileByUserIdAsync(query.UserId),
-            _ => Error.Unexpected(description: "Unexpected profile type")
+            _ => GetProfileErrors.UnexpectedProfileType
         };
     }
 }

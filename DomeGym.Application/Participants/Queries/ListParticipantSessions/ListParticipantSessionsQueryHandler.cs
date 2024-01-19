@@ -22,7 +22,7 @@ public sealed class ListParticipantSessionsQueryHandler : IRequestHandler<ListPa
 
         if (participant is null)
         {
-            return Error.NotFound(description: "Participant not found");
+            return ListParticipantErrors.ParticipantNotFound;
         }
 
         return await _sessionsRepository.ListByIdsAsync(participant.SessionIds, query.StartDateTime, query.EndDateTime);

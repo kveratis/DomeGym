@@ -7,10 +7,6 @@ namespace DomeGym.Application.Gyms.Queries.ListGyms;
 
 public sealed class ListGymsQueryHandler : IRequestHandler<ListGymsQuery, ErrorOr<List<Gym>>>
 {
-    public static readonly Error SubscriptionNotFound = Error.NotFound(
-        "ListGymsQueryHandler.SubscriptionNotFound",
-        "Subscription not found");
-
     private readonly IGymsRepository _gymsRepository;
     private readonly ISubscriptionsRepository _subscriptionsRepository;
 
@@ -24,7 +20,7 @@ public sealed class ListGymsQueryHandler : IRequestHandler<ListGymsQuery, ErrorO
     {
         if (!await _subscriptionsRepository.ExistsAsync(query.SubscriptionId))
         {
-            return SubscriptionNotFound;
+            return ListGymsErrors.SubscriptionNotFound;
         }
 
         return await _gymsRepository.ListSubscriptionGymsAsync(query.SubscriptionId);

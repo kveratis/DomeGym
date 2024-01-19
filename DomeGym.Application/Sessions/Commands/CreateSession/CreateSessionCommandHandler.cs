@@ -9,22 +9,6 @@ namespace DomeGym.Application.Sessions.Commands.CreateSession;
 
 public sealed class CreateSessionCommandHandler : IRequestHandler<CreateSessionCommand, ErrorOr<Session>>
 {
-    public static readonly Error RoomNotFound = Error.NotFound(
-        "CreateSessionCommandHandler.RoomNotFound", 
-        "Room not found");
-    
-    public static readonly Error TrainerNotFound = Error.NotFound(
-        "CreateSessionCommandHandler.TrainerNotFound", 
-        "Trainer not found");
-    
-    public static readonly Error InvalidDateAndTime = Error.Validation(
-        "CreateSessionCommandHandler.InvalidDateAndTime", 
-        "Invalid date and time");
-    
-    public static readonly Error TrainersCalendarIsNotFreeForSession = Error.Validation(
-        "CreateSessionCommandHandler.TrainersCalendarIsNotFreeForSession", 
-        "Trainer's calendar is not free for the entire session duration");
-    
     private readonly IRoomsRepository _roomsRepository;
     private readonly ITrainersRepository _trainersRepository;
 
@@ -40,26 +24,26 @@ public sealed class CreateSessionCommandHandler : IRequestHandler<CreateSessionC
 
         if (room is null)
         {
-            return RoomNotFound;
+            return CreateSessionErrors.RoomNotFound;
         }
 
         var trainer = await _trainersRepository.GetByIdAsync(command.TrainerId);
 
         if (trainer is null)
         {
-            return TrainerNotFound;
+            return CreateSessionErrors.TrainerNotFound;
         }
 
         var createTimeRangeResult = TimeRange.FromDateTimes(command.StartDateTime, command.EndDateTime);
 
         if (createTimeRangeResult.IsError && createTimeRangeResult.FirstError.Type == ErrorType.Validation)
         {
-            return InvalidDateAndTime;
+            return CreateSessionErrors.InvalidDateAndTime;
         }
 
         if (!trainer.IsTimeSlotFree(DateOnly.FromDateTime(command.StartDateTime), createTimeRangeResult.Value))
         {
-            return TrainersCalendarIsNotFreeForSession;
+            return CreateSessionErrors.TrainersCalendarIsNotFreeForSession;
         }
 
         var session = new Session(

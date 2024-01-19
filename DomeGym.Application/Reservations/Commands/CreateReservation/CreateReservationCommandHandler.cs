@@ -7,26 +7,6 @@ namespace DomeGym.Application.Reservations.Commands.CreateReservation;
 
 public sealed class CreateReservationCommandHandler : IRequestHandler<CreateReservationCommand, ErrorOr<Success>>
 {
-    public static readonly Error SessionNotFound = Error.NotFound(
-        "CreateReservationCommandHandler.SessionNotFound",
-        "Session not found");
-    
-    public static readonly Error ParticipantAlreadyHasReservation = Error.NotFound(
-        "CreateReservationCommandHandler.ParticipantAlreadyHasReservation", 
-        "Participant already has reservation");
-    
-    public static readonly Error ParticipantNotFound = Error.NotFound(
-        "CreateReservationCommandHandler.ParticipantNotFound",
-        "Participant not found");
-    
-    public static readonly Error ParticipantNotExpectedToHaveReservation = Error.Unexpected(
-        "CreateReservationCommandHandler.ParticipantNotExpectedToHaveReservation", 
-        "Participant not expected to have reservation to session");
-    
-    public static readonly Error ParticipantCalendarNotFreeForSession = Error.Conflict(
-        "CreateReservationCommandHandler.ParticipantCalendarNotFreeForSession", 
-        "Participant's calendar is not free for the entire session duration");
-    
     private readonly ISessionsRepository _sessionsRepository;
     private readonly IParticipantsRepository _participantsRepository;
     
@@ -42,29 +22,29 @@ public sealed class CreateReservationCommandHandler : IRequestHandler<CreateRese
 
         if (session is null)
         {
-            return SessionNotFound;
+            return CreateReservationErrors.SessionNotFound;
         }
 
         if (session.HasReservationForParticipant(command.ParticipantId))
         {
-            return ParticipantAlreadyHasReservation;
+            return CreateReservationErrors.ParticipantAlreadyHasReservation;
         }
 
         var participant = await _participantsRepository.GetByIdAsync(command.ParticipantId);
 
         if (participant is null)
         {
-            return ParticipantNotFound;
+            return CreateReservationErrors.ParticipantNotFound;
         }
 
         if (participant.HasReservationForSession(session.Id))
         {
-            return ParticipantNotExpectedToHaveReservation;
+            return CreateReservationErrors.ParticipantNotExpectedToHaveReservation;
         }
 
         if (!participant.IsTimeSlotFree(session.Date, session.Time))
         {
-            return ParticipantCalendarNotFreeForSession;
+            return CreateReservationErrors.ParticipantCalendarNotFreeForSession;
         }
 
         var reserveSpotResult = session.ReserveSpot(participant);

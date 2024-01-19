@@ -7,14 +7,6 @@ namespace DomeGym.Application.Rooms.Commands.DeleteRoom;
 
 public sealed class DeleteRoomCommandHandler : IRequestHandler<DeleteRoomCommand, ErrorOr<Deleted>>
 {
-    public static readonly Error GymNotFound = Error.NotFound(
-        "DeleteRoomCommandHandler.GymNotFound", 
-        "Gym not found");
-    
-    public static readonly Error RoomNotFound = Error.NotFound(
-        "DeleteRoomCommandHandler.RoomNotFound", 
-        "Room not found");
-    
     private readonly IGymsRepository _gymsRepository;
     private readonly IRoomsRepository _roomsRepository;
 
@@ -30,19 +22,19 @@ public sealed class DeleteRoomCommandHandler : IRequestHandler<DeleteRoomCommand
 
         if (gym is null)
         {
-            return GymNotFound;
+            return DeleteRoomErrors.GymNotFound;
         }
 
         if (!gym.HasRoom(command.RoomId))
         {
-            return RoomNotFound;
+            return DeleteRoomErrors.RoomNotFound;
         }
 
         var room = await _roomsRepository.GetByIdAsync(command.RoomId);
 
         if (room is null)
         {
-            return RoomNotFound;
+            return DeleteRoomErrors.RoomNotFound;
         }
 
         var removeGymResult = gym.RemoveRoom(room);
